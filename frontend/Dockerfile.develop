@@ -1,0 +1,30 @@
+# syntax=docker/dockerfile:experimental
+# Build with DOCKER_BUILDKIT=1 while support for caching features is not 'on by default' in Docker.
+
+FROM debian:bullseye-slim
+
+RUN apt-get update && apt-get install -y \
+      haskell-platform \
+      procps
+
+RUN curl -sSL https://get.haskellstack.org/ | sh
+
+RUN mkdir /app && cd /app
+WORKDIR /app
+
+COPY stack.yaml .
+RUN stack update
+
+# Copy in the cabal files, so that we can install dependencies. This is done as
+# a separate step so that dependencies don't need to be invalidated for typical
+# builds - only if these files are changed.
+COPY frontend.cabal .
+
+# Build dependencies.
+RUN stack build --dependencies-only
+
+# Build the project
+COPY . .
+RUN stack build
+
+CMD ["stack", "exec", "--allow-different-user", "--", "frontend-server"]

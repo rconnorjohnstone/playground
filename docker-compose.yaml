@@ -1,0 +1,44 @@
+version: '3.7'
+
+services: 
+  front_end: 
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.develop
+    env_file: 
+      - ./frontend/frontend.env
+    ports: 
+      - 3000:3000
+    networks: 
+      - backend_network
+    container_name: frontend
+  yesod_app: 
+    build: 
+      context: ./yesodApp
+      dockerfile: Dockerfile.develop
+    env_file: 
+      - ./yesodApp/yesodApp.env
+    ports: 
+      - 4000:3000
+    networks: 
+      - backend_network
+      - database_network
+    container_name: yesodApp
+    stdin_open: true
+    depends_on:
+      - database
+  database:
+    image: postgres:12.1
+    environment:
+      POSTGRES_DB: my_database
+      POSTGRES_USER: yesodApp
+      POSTGRES_PASSWORD: yesodApp
+    ports:
+      - 5432:5432
+    networks: 
+      - database_network
+    container_name: database
+
+networks:
+  backend_network:
+  database_network:
