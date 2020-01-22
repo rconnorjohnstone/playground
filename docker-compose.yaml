@@ -16,6 +16,25 @@ services:
     build: 
       context: ./yesodApp
       dockerfile: Dockerfile.develop
+    volumes:
+      - type: bind
+        source: ./yesodApp/app
+        target: /app/app
+      - type: bind
+        source: ./yesodApp/config
+        target: /app/config
+      - type: bind
+        source: ./yesodApp/src
+        target: /app/src
+      - type: bind
+        source: ./yesodApp/static
+        target: /app/static
+      - type: bind
+        source: ./yesodApp/templates
+        target: /app/templates
+      - type: bind
+        source: ./yesodApp/test
+        target: /app/test
     env_file: 
       - ./yesodApp/yesodApp.env
     ports: 
@@ -25,6 +44,23 @@ services:
       - database_network
     container_name: yesodApp
     stdin_open: true
+    depends_on:
+      - database
+  actix:
+    build: 
+      context: ./actix
+    env_file: 
+      - ./actix/actix.env
+    ports: 
+      - 3500:8088
+    networks: 
+      - backend_network
+      - database_network
+    container_name: actix
+    volumes:
+      - type: bind
+        source: ./actix/src
+        target: /app/src
     depends_on:
       - database
   database:
