@@ -74,6 +74,23 @@ services:
     networks: 
       - database_network
     container_name: database
+  rocket:
+    build: 
+      context: ./rocket
+    env_file: 
+      - ./rocket/rocket.env
+    ports: 
+      - 4500:8000
+    networks: 
+      - backend_network
+      - database_network
+    container_name: rocket
+    volumes:
+      - type: bind
+        source: ./rocket/src
+        target: /app/src
+    depends_on:
+      - database
 
 networks:
   backend_network:
